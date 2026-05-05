@@ -1,70 +1,87 @@
-# Getting Started with Create React App
+# Classy Weather (React - Class Components)
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Lightweight weather demo built with React class components. This project shows practical examples of:
 
-## Available Scripts
+- React class components and state
+- Data fetching (geocoding + forecast)
+- Parent → child and child → parent communication
+- Component lifecycle methods
+- Basic error handling and loading UI
 
-In the project directory, you can run:
+## Quick Start
 
-### `npm start`
+Install dependencies and run locally:
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+```bash
+npm install
+npm start
+```
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+Open http://localhost:3000 to view the app.
 
-### `npm test`
+## Key Files
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+- `src/App.js` — main app using class components, includes `Input`, `Weather`, and `Day` classes.
+- `src/Appv2.js` — alternative implementation showing constructor/binding and a manual fetch button.
+- `src/Counter.js` — example class component demonstrating state updates with functional `setState`.
+- `src/starter.js` — helper snippets and commented utilities.
 
-### `npm run build`
+## React Classes
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+The app is implemented with class components to demonstrate classic React patterns:
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+- `App` (`src/App.js`): holds top-level state (`location`, `isLoading`, `displayLocation`, `weather`) and orchestrates data fetching.
+- `Input`: child component (declared inside `App.js`) that receives `location` and an `onChange` handler from `App` to update the parent state.
+- `Weather` and `Day`: presentational children that receive weather data as props and render the forecast.
+- `Counter` (`src/Counter.js`): standalone class example showing constructor binding and functional state updates.
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+## Data fetching
 
-### `npm run eject`
+Data is fetched from the Open-Meteo APIs in `App.fetchWeather()`:
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+1. Geocoding: `https://geocoding-api.open-meteo.com/v1/search?name=...` to resolve the typed location to latitude/longitude.
+2. Forecast: `https://api.open-meteo.com/v1/forecast?...&daily=weathercode,temperature_2m_max,temperature_2m_min` to retrieve daily data.
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+Implementation notes:
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+- Fetch calls run inside an `async` method on the class (`fetchWeather`).
+- `isLoading` state toggles a loading indicator in the UI.
+- The code checks for `geoData.results` and throws an `Error("Location not found")` when appropriate.
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+## Parent–Child Communication
 
-## Learn More
+- Child to parent: the `Input` component calls the `onChange` handler passed from `App` to update `App.state.location` (this is how typed input flows up).
+- Parent to child: `App` passes `weather` data and `displayLocation` to `Weather`, which in turn passes individual day props to `Day`.
+- Data flows down via props; events flow up via callbacks (classic unidirectional React data flow).
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+## Component Lifecycle
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+- `componentDidMount()` in `App` reads a saved `location` from `localStorage` and sets it into state.
+- `componentDidUpdate(prevProps, prevState)` watches `location` changes to call `fetchWeather()` and persist the new location to `localStorage`.
+- `componentWillUnmount()` is hinted (commented) in the `Weather` class as a place to clean up if needed.
 
-### Code Splitting
+These lifecycle methods mirror common `useEffect` patterns but use the class-method form.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+## Error Handling
 
-### Analyzing the Bundle Size
+- Fetch operations are wrapped in `try { ... } catch (err) { ... } finally { ... }` blocks. Errors are logged to the console (`console.error`).
+- The code throws an explicit error when geocoding returns no results.
+- Current UX shows a `Loading...` indicator via `isLoading`, but does not yet display user-facing error messages—this is a recommended improvement.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+Suggested error/robustness improvements:
 
-### Making a Progressive Web App
+- Show user-friendly error messages in the UI instead of only `console.error`.
+- Use `AbortController` to cancel stale requests when `location` changes rapidly.
+- Validate and sanitize user input before sending requests.
+- Add PropTypes or TypeScript for clearer prop contracts.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+## Notes & Next Steps
 
-### Advanced Configuration
+- `Appv2.js` demonstrates an alternate pattern with a `constructor`, explicit `bind`, and a manual fetch button instead of automatic fetching on update.
+- `Counter.js` is a small example of state updates using the functional form of `setState` to avoid stale state.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+If you'd like, I can:
 
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+- Add UI error messages and an error banner.
+- Convert these class components to functional components using hooks.
+- Add `prop-types` and simple unit tests for components.

@@ -19,6 +19,7 @@ function getWeatherIcon(wmoCode) {
 }
 
 function convertToFlag(countryCode) {
+  if (countryCode.length !== 2) return "";
   const codePoints = countryCode
     .toUpperCase()
     .split("")
@@ -95,7 +96,7 @@ class App extends React.Component {
           onChangeLocation={this.setLocation}
         />
         {this.state.isLoading && <p className="loader">Loading...</p>}
-        {this.state.weather.weathercode && (
+        {this.state.weather?.weathercode && (
           <Weather
             weather={this.state.weather}
             location={this.state.displayLocation}
